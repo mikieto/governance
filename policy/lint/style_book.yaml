@@ -1,0 +1,17 @@
+id: book
+max_heading_depth: 3
+table_rules:
+  header_required: true
+  align_right_forbidden: true
+banned_phrases:
+  - "最新"
+  - "直近"
+  - "今年"
+  - "best-in-class"
+terms_dict:
+  AI協働:
+    - "AI コラボ"
+    - "AI連携"
+  "Data Vault":
+    - "DV2.0"
+docx_reference: policy/templates/book.docx

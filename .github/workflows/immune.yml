@@ -1,0 +1,85 @@
+name: immune
+on:
+  workflow_call:
+    inputs:
+      style_pack:
+        description: "Style pack id (e.g., 'book')"
+        required: false
+        type: string
+        default: "book"
+      strict:
+        description: "Block on failures (true) or warn-only (false)"
+        required: false
+        type: boolean
+        default: false
+      allow_override_label:
+        description: "If this PR label is present, skip blocking (use with caution)"
+        required: false
+        type: string
+        default: "gov-override"
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout caller repo to ./caller
+      - uses: actions/checkout@v4
+        with:
+          path: caller
+      # Checkout governance (this repo) to ./governance
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository }}
+          ref: ${{ github.ref }}
+          path: governance
+
+      - uses: actions/setup-python@v5
+
+      # Detect labels for override
+      - id: labels
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const labels = context.payload.pull_request?.labels?.map(l => l.name) || [];
+            const allow = `${{ inputs.allow_override_label }}`;
+            core.setOutput('override', (allow && labels.includes(allow)) ? 'true' : 'false');
+
+      # Path filter to keep run time low
+      - id: changes
+        uses: dorny/paths-filter@v3
+        with:
+          base: ${{ github.event.pull_request.base.sha }}
+          ref:  ${{ github.event.pull_request.head.sha }}
+          filters: |
+            docs:
+              - 'caller/docs/**'
+            ledger:
+              - 'caller/ledger/**'
+            generated:
+              - 'caller/generated/**'
+
+      - name: Short-circuit (no relevant changes)
+        if: steps.labels.outputs.override != 'true' && steps.changes.outputs.docs != 'true' && steps.changes.outputs.ledger != 'true' && steps.changes.outputs.generated != 'true'
+        run: echo "No relevant changes in docs/ledger/generated. Skipping checks."
+
+      - name: Validate schema (ledger/tasks.yaml)
+        if: steps.labels.outputs.override != 'true' && (steps.changes.outputs.ledger == 'true')
+        continue-on-error: ${{ inputs.strict != true }}
+        run: |
+          pipx install check-jsonschema
+          check-jsonschema --schemafile governance/policy/schema/task.schema.json caller/ledger/tasks.yaml
+
+      - name: Lint style pack
+        if: steps.labels.outputs.override != 'true' && (steps.changes.outputs.docs == 'true' || steps.changes.outputs.generated == 'true')
+        continue-on-error: ${{ inputs.strict != true }}
+        run: |
+          python governance/tools/lint_stylepack.py             --style-pack governance/policy/lint/style_${{ inputs.style_pack }}.yaml             --paths caller/docs caller/generated
+
+      - name: Global banned phrases (grep)
+        if: steps.labels.outputs.override != 'true' && (steps.changes.outputs.docs == 'true')
+        continue-on-error: ${{ inputs.strict != true }}
+        run: |
+          if [ -f governance/policy/lint/banned_phrases.txt ]; then
+            if grep -R -E -n -f governance/policy/lint/banned_phrases.txt caller/docs/ ; then
+              echo "::warning:: Found banned phrases (global list)."
+            fi
+          fi

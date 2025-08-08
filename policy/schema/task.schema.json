@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Ledger Task",
+  "type": "object",
+  "required": ["id","primitive","risk","approval","rbac_role","budget","inputs"],
+  "properties": {
+    "id": {"type":"string"},
+    "primitive": {"type":"string"},
+    "risk": {"enum":["LOW","MED","HIGH"]},
+    "approval": {"enum":["auto","pr"]},
+    "rbac_role": {"type":"string"},
+    "budget": {
+      "type":"object",
+      "required": ["time_min","api_cost_usd"],
+      "properties": {
+        "time_min":{"type":"number","minimum":0},
+        "api_cost_usd":{"type":"number","minimum":0}
+      }
+    },
+    "inputs": {"type":"object"}
+  }
+}
