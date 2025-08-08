@@ -22,15 +22,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # Checkout caller repo to ./caller
-      - uses: actions/checkout@v4
+      - name: Checkout caller (PR head)
+        uses: actions/checkout@v4
         with:
           path: caller
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
       # Checkout governance (this repo) to ./governance
-      - uses: actions/checkout@v4
+      - name: Checkout governance policies (@v1)
+        uses: actions/checkout@v4
         with:
-          repository: ${{ github.repository }}
-          ref: ${{ github.ref }}
+          repository: mikieto/governance
+          ref: v1
           path: governance
+          fetch-depth: 0
 
       - uses: actions/setup-python@v5
 
@@ -47,15 +53,16 @@ jobs:
       - id: changes
         uses: dorny/paths-filter@v3
         with:
-          base: ${{ github.event.pull_request.base.sha }}
-          ref:  ${{ github.event.pull_request.head.sha }}
+          working-directory: caller
+          base: ${{ github.event.pull_request.base.sha || github.sha }}
+          ref:  ${{ github.event.pull_request.head.sha || github.sha }}
           filters: |
             docs:
-              - 'caller/docs/**'
+              - 'docs/**'
             ledger:
-              - 'caller/ledger/**'
+              - 'ledger/**'
             generated:
-              - 'caller/generated/**'
+              - 'generated/**'
 
       - name: Short-circuit (no relevant changes)
         if: steps.labels.outputs.override != 'true' && steps.changes.outputs.docs != 'true' && steps.changes.outputs.ledger != 'true' && steps.changes.outputs.generated != 'true'
