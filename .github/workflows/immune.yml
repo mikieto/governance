@@ -1,0 +1,37 @@
+# .github/workflows/immune.yml
+
+# ワークフローの名前
+name: "Governance Immune System"
+
+# このワークフローが他のワークフローから呼び出されることを示すトリガー
+on:
+  workflow_call:
+    # 呼び出し元から受け取るパラメータ（インプット）を定義
+    inputs:
+      # チェック対象のディレクトリを呼び出し元が指定できるようにする
+      target-directory:
+        description: 'The directory to be inspected'
+        required: true
+        type: string
+
+# 実行されるジョブを定義
+jobs:
+  inspect-files:
+    # ジョブの名前
+    name: "Inspect Target Directory"
+    # 実行環境
+    runs-on: ubuntu-latest
+
+    # ジョブのステップ
+    steps:
+      # 1. 呼び出し元のリポジトリのコードをチェックアウトする
+      - name: "Checkout code from calling repository"
+        uses: actions/checkout@v4
+
+      # 2. どのディレクトリをチェックするか確認メッセージを表示
+      - name: "Display target directory"
+        run: echo "Inspecting files in the '${{ inputs.target-directory }}' directory..."
+
+      # 3. 指定されたディレクトリのファイル一覧を再帰的に表示する
+      - name: "List files in target directory"
+        run: ls -R ${{ inputs.target-directory }}
