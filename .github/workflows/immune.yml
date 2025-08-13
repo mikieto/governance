@@ -3,11 +3,7 @@
 name: Governance Immune System
 on:
   workflow_call:
-    inputs:
-      target-directory:
-        description: The directory to be inspected
-        required: true
-        type: string
+
 jobs:
   inspect-and-lint:
     name: Inspect and Lint
