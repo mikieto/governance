@@ -1,0 +1,19 @@
+---
+id: TASK-GOV-001
+status: pending
+deps: []
+tags: [governance, system-improvement, adr-driven]
+why_3lines:
+  upper: 組織全体のコードとドキュメントの品質を自動的に保証する
+  local: ADR-GOV-001の決定事項を実装する
+  kpi: CI実行時に主要なファイル（Python, YAML, MD）の静的解析が100%実行される
+w_to_whw:
+  step0_what: MegaLinterを軽量設定で`governance`リポジトリのCIに組み込む
+  step1_why: 手動レビューでは見逃しがちなスタイル違反や潜在的なバグを自動で検知するため
+  step2_how: >
+    1. `governance`リポジトリのルートに`.megalinter.yml`を配置する。
+    2. `.github/workflows/immune.yml`を修正し、MegaLinterを実行するステップを追加する。
+  step3_what: 以降、`project-heart`のCI実行時にMegaLinterが自動で稼働する
+audit:
+  why_pinning: ADR-GOV-001
+  context_snapshot: commit-hash-before-megalinter  # 実際のコミットハッシュに置き換える

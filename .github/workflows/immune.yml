@@ -1,37 +1,28 @@
+---
 # .github/workflows/immune.yml
-
-# ワークフローの名前
-name: "Governance Immune System"
-
-# このワークフローが他のワークフローから呼び出されることを示すトリガー
+name: Governance Immune System
 on:
   workflow_call:
-    # 呼び出し元から受け取るパラメータ（インプット）を定義
     inputs:
-      # チェック対象のディレクトリを呼び出し元が指定できるようにする
       target-directory:
-        description: 'The directory to be inspected'
+        description: The directory to be inspected
         required: true
         type: string
-
-# 実行されるジョブを定義
 jobs:
-  inspect-files:
-    # ジョブの名前
-    name: "Inspect Target Directory"
-    # 実行環境
+  inspect-and-lint:
+    name: Inspect and Lint
     runs-on: ubuntu-latest
-
-    # ジョブのステップ
     steps:
-      # 1. 呼び出し元のリポジトリのコードをチェックアウトする
-      - name: "Checkout code from calling repository"
+      - name: Checkout code from calling repository
         uses: actions/checkout@v4
 
-      # 2. どのディレクトリをチェックするか確認メッセージを表示
-      - name: "Display target directory"
-        run: echo "Inspecting files in the '${{ inputs.target-directory }}' directory..."
-
-      # 3. 指定されたディレクトリのファイル一覧を再帰的に表示する
-      - name: "List files in target directory"
-        run: ls -R ${{ inputs.target-directory }}
+      # --- 修正点 ---: MegaLinterを実行するステップを追加
+      - name: Run MegaLinter
+        uses: oxsecurity/megalinter@v7
+        env:
+          # 呼び出し元のリポジトリ全体をチェック対象とする
+          VALIDATE_ALL_CODEBASE: true
+          # governanceリポジトリにある設定ファイルを参照させる
+          MEGALINTER_CONFIG: https://raw.githubusercontent.com/${{ github.repository }}/main/.megalinter.yml
+          # GitHub Actionsの出力をよりリッチにする
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

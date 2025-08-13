@@ -1,0 +1,25 @@
+---
+# .megalinter.yml
+# This configuration file optimizes MegaLinter to be fast and lightweight
+# by explicitly enabling only the linters required for this project.
+
+# --- General Settings ---
+VALIDATE_ALL_CODEBASE: false
+SHOW_ELAPSED_TIME: true
+FAIL_ON_ERROR: true
+# --- Linter Activation ---
+# By default, disable all linters
+DISABLE_LINTERS:
+  - ALL
+# Explicitly enable only the linters we need for this project
+ENABLE_LINTERS:
+  # For Python scripts
+  - PYTHON_FLAKE8
+  - PYTHON_BLACK
+  # For YAML configuration files
+  - YAML_YAMLLINT
+  # For Markdown documents
+  - MARKDOWN_MARKDOWNLINT
+# --- Linter-Specific Configuration ---
+# Example: Configure markdownlint to follow specific rules
+MARKDOWN_MARKDOWNLINT_CONFIG_FILE: .markdownlint.yml
