@@ -23,6 +23,6 @@ jobs:
           # 呼び出し元のリポジトリ全体をチェック対象とする
           VALIDATE_ALL_CODEBASE: true
           # governanceリポジトリにある設定ファイルを参照させる
-          MEGALINTER_CONFIG: https://raw.githubusercontent.com/${{ github.repository }}/main/.megalinter.yml
-          # GitHub Actionsの出力をよりリッチにする
+          MEGALINTER_CONFIG: "https://raw.githubusercontent.com/mikieto/governance/main/.megalinter.yml"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+

@@ -1,6 +1,6 @@
 ---
 id: TASK-GOV-001
-status: pending
+status: completed
 deps: []
 tags: [governance, system-improvement, adr-driven]
 why_3lines:
